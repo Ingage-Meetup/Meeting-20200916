@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PokerHand;
 using NUnit.Framework;
@@ -16,60 +17,6 @@ namespace PokerHand.Test
         {
             PokerHand testHand = new PokerHand("KS 2H 5C JD TD");
             Assert.AreEqual(5, testHand.GetHand().Length);
-        }
-
-        [Test]
-        public void ValidHandReturnsValid()
-        {
-            PokerHand testHand = new PokerHand("KS 2H 5C JD TD");
-            string[] hand = {"KS", "2H", "5C", "JD", "TD"};
-            Assert.IsTrue(testHand.IsHandValid(hand), "Valid hand flagged as invalid");
-
-        }
-
-        [Test]
-        public void BadSuitReturnsInvalid()
-        {
-            PokerHand testHand = new PokerHand("KS 2H 5L JD TD");
-            string[] hand = { "KS", "2H", "5L", "JD", "TD" };
-            Assert.IsFalse(testHand.IsHandValid(hand), "Hand with illegal suit returned valid");
-
-        }
-
-        [Test]
-        public void BadRankReturnsInvalid()
-        {
-            PokerHand testHand = new PokerHand("KS 2H 5C 1D TD");
-            string[] hand = { "KS", "2H", "5C", "1D", "TD" };
-            Assert.IsFalse(testHand.IsHandValid(hand), "Hand with illegal rank returned valid");
-
-        }
-
-        [Test]
-        public void ExtraneousCharacterReturnsInvalid()
-        {
-            PokerHand testHand = new PokerHand("KS 2H 5CQ JD TD");
-            string[] hand = { "KS", "2H", "5CQ", "JD", "TD" };
-            Assert.IsFalse(testHand.IsHandValid(hand), "Hand with extraneous character returned valid");
-
-        }
-
-        [Test]
-        public void TooManyCardsReturnsInvalid()
-        {
-            PokerHand testHand = new PokerHand("KS 2H 5C JD TD AH");
-            string[] hand = { "KS", "2H", "5C", "JD", "TD", "AH" };
-            Assert.IsFalse(testHand.IsHandValid(hand), "Hand with too many cards returned valid");
-
-        }
-
-        [Test]
-        public void TooFewCardsReturnsInvalid()
-        {
-            PokerHand testHand = new PokerHand("KS 2H 5C JD");
-            string[] hand = { "KS", "2H", "5C", "JD" };
-            Assert.IsFalse(testHand.IsHandValid(hand), "Hand with too few cards returned valid");
-
         }
 
         [Test]
