@@ -41,7 +41,6 @@ namespace PokerHand.Test
             Assert.AreEqual(1, ranks[3]);
             Assert.AreEqual(1, ranks[9]);
             Assert.AreEqual(1, ranks[8]);
-
         }
 
         [Test]
@@ -51,7 +50,6 @@ namespace PokerHand.Test
             Dictionary<int, int> ranks = testHand.GetMyRanks();
             Assert.AreEqual(3, ranks[11]);
             Assert.AreEqual(2, ranks[8]);
-
         }
 
         [Test]
@@ -130,8 +128,6 @@ namespace PokerHand.Test
             PokerHand testHand = new PokerHand("QS KH AC TD JH");
             Assert.AreEqual(HandType.Straight, testHand.GetHandType());
         }
-
-
 
         [Test]
         public void DetectStraightAceHigh()
@@ -353,7 +349,5 @@ namespace PokerHand.Test
             PokerHand player2 = new PokerHand("2C 5H 5D 5S 5C");
             Assert.AreEqual(Result.Win, player1.CompareWith(player2));
         }
-
-
     }
 }
