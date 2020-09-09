@@ -17,7 +17,7 @@ namespace PokerHand
         private static Dictionary<HandType, int> aggregateHands = new Dictionary<HandType, int>();
         static void Main(string[] args)
         {
-            CreateDeck(); 
+            CreateDeck();
 
             // Generate 100 hands and print them out for analysis
             Console.WriteLine("Generate 100 hands and print them out for analysis");
@@ -44,7 +44,7 @@ namespace PokerHand
             int numberOfRoyalFlushes = 0;
 
             //while (numberOfRoyalFlushes<10)
-            for (int i=0; i<2000000; i++)
+            for (int i = 0; i < 2000000; i++)
             {
                 ShuffleCards();
                 var player1 = new PokerHand(DealHand(0));
@@ -57,7 +57,7 @@ namespace PokerHand
                 LogHand(player4);
                 var player5 = new PokerHand(DealHand(20));
                 LogHand(player5);
-                if (player1.GetHandType() == HandType.Royal_Flush 
+                if (player1.GetHandType() == HandType.Royal_Flush
                     || player2.GetHandType() == HandType.Royal_Flush
                     || player3.GetHandType() == HandType.Royal_Flush
                     || player4.GetHandType() == HandType.Royal_Flush
@@ -68,7 +68,7 @@ namespace PokerHand
                 }
             }
 
-            aggregateHands.ToList().ForEach(x=> Console.WriteLine($"{x.Key.ToString().PadRight(20)}{x.Value, 20}"));
+            aggregateHands.ToList().ForEach(x => Console.WriteLine($"{x.Key.ToString().PadRight(20)}{x.Value,20}"));
 
         }
 
@@ -157,13 +157,21 @@ namespace PokerHand
         private readonly char[] Ranks = { '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A' };
         private Dictionary<char, int> MySuits { get; set; }
         private Dictionary<int, int> MyRanks { get; set; }
+
         public PokerHand(string cards)
         {
             InputString = cards;
             MyCards = cards.Split(' ');
             InitMySuits();
             InitMyRanks();
-            MyHandType = DetermineHandType();
+            if (HandIsValid())
+            {
+                MyHandType = DetermineHandType();
+            }
+            else
+            {
+                throw new Exception("Invalid hand!");
+            }
         }
 
         public void InitMyRanks()
@@ -216,13 +224,6 @@ namespace PokerHand
             return MySuits;
         }
 
-        public int GetHighestPair(Dictionary<int, int> ranks)
-        {
-            int rank = -1;
-
-            return rank;
-        }
-
         public string[] GetHand()
         {
             return MyCards;
@@ -237,7 +238,7 @@ namespace PokerHand
         {
             Result res = Result.Tie;
             int myHandVal = (int)this.MyHandType;
-            int opponentHandVal = (int) opponentHand.GetHandType();
+            int opponentHandVal = (int)opponentHand.GetHandType();
             if (myHandVal > opponentHandVal)
             {
                 res = Result.Win;
@@ -258,20 +259,32 @@ namespace PokerHand
         public Result BreakTheTie(PokerHand opponentHand)
         {
             Result res = Result.Tie;
-
+            var myRanksArray = MyRanks.ToArray();
+            var oppRanksArray = opponentHand.MyRanks.ToArray();
             switch (MyHandType)
             {
-                case HandType.High_Card:        // highest card wins
-                case HandType.Flush:            // highest ranked card wins
+                case HandType.High_Card:        // highest rank wins
+                case HandType.Flush:            // highest rank card wins
                 case HandType.Straight_Flush:   // highest rank at the top of the sequence wins
-                case HandType.Straight:         // highest ranking card at the top of the sequence wins
-                    int myHighCard = MyRanks.Keys.Max(x => x);
-                    int oppHighCard = opponentHand.MyRanks.Keys.Max(x => x);
-                    if (myHighCard > oppHighCard)
+                case HandType.Straight:         // highest rank card at the top of the sequence wins
+
+                    int myHighCardRank = 0;
+                    for (int i = 0; i < MyRanks.Count; i++)
+                    {
+                        if (myRanksArray[i].Key > myHighCardRank)
+                            myHighCardRank = myRanksArray[i].Key;
+                    }
+                    int oppHighCardRank = 0;
+                    for (int i = 0; i < opponentHand.MyRanks.Count; i++)
+                    {
+                        if (oppRanksArray[i].Key > oppHighCardRank)
+                            oppHighCardRank = oppRanksArray[i].Key;
+                    }
+                    if (myHighCardRank > oppHighCardRank)
                     {
                         res = Result.Win;
                     }
-                    else if (myHighCard < oppHighCard)
+                    else if (myHighCardRank < oppHighCardRank)
                     {
                         res = Result.Loss;
                     }
@@ -282,25 +295,35 @@ namespace PokerHand
                     break;
                 case HandType.Pair:             // highest pair wins
                 case HandType.Two_Pair:         // highest pair wins
-                    int myMaxRank = MyRanks.Where(x => x.Value == 2).Max(x => x.Key);
-                    int opponentMaxRank = opponentHand.MyRanks.Where(x => x.Value == 2).Max(x => x.Key);
-                    if (myMaxRank > opponentMaxRank)
+                    int myHighPairRank = 0;
+                    for (int i = 0; i < MyRanks.Count; i++)
+                    {
+                        if (myRanksArray[i].Value == 2 && myRanksArray[i].Key > myHighPairRank)
+                            myHighPairRank = myRanksArray[i].Key;
+                    }
+                    int oppHighPairRank = 0;
+                    for (int i = 0; i < opponentHand.MyRanks.Count; i++)
+                    {
+                        if (oppRanksArray[i].Value == 2 && oppRanksArray[i].Key > oppHighPairRank)
+                            oppHighPairRank = oppRanksArray[i].Key;
+                    }
+                    if (myHighPairRank > oppHighPairRank)
                     {
                         res = Result.Win;
                     }
-                    else if (myMaxRank < opponentMaxRank)
+                    else if (myHighPairRank < oppHighPairRank)
                     {
                         res = Result.Loss;
                     }
                     else
                     {
-                        myMaxRank = MyRanks.Where(x => x.Value == 1).Max(x => x.Key);
-                        opponentMaxRank = opponentHand.MyRanks.Where(x => x.Value == 1).Max(x => x.Key);
-                        if (myMaxRank > opponentMaxRank)
+                        myHighPairRank = MyRanks.Where(x => x.Value == 1).Max(x => x.Key);
+                        oppHighPairRank = opponentHand.MyRanks.Where(x => x.Value == 1).Max(x => x.Key);
+                        if (myHighPairRank > oppHighPairRank)
                         {
                             res = Result.Win;
                         }
-                        else if (myMaxRank < opponentMaxRank)
+                        else if (myHighPairRank < oppHighPairRank)
                         {
                             res = Result.Loss;
                         }
@@ -312,13 +335,23 @@ namespace PokerHand
                     break;
                 case HandType.Three_Of_A_Kind:  // highest ranking 3 of a kind wins
                 case HandType.Full_House:       // Highest 3 cards wins
-                    myMaxRank = MyRanks.Where(x => x.Value == 3).Max(x => x.Key);
-                    opponentMaxRank = opponentHand.MyRanks.Where(x => x.Value == 3).Max(x => x.Key);
-                    if (myMaxRank > opponentMaxRank)
+                    int  myHighPairRankForThreeOfAKind = 0;
+                    for (int i = 0; i < MyRanks.Count; i++)
+                    {
+                        if (myRanksArray[i].Value == 3 && myRanksArray[i].Key > myHighPairRankForThreeOfAKind)
+                            myHighPairRankForThreeOfAKind = myRanksArray[i].Key;
+                    }
+                    int oppHighPairRankForThreeOfAKind = 0;
+                    for (int i = 0; i < opponentHand.MyRanks.Count; i++)
+                    {
+                        if (oppRanksArray[i].Value == 3 && oppRanksArray[i].Key > oppHighPairRankForThreeOfAKind)
+                            oppHighPairRankForThreeOfAKind = oppRanksArray[i].Key;
+                    }
+                    if (myHighPairRankForThreeOfAKind > oppHighPairRankForThreeOfAKind)
                     {
                         res = Result.Win;
                     }
-                    else if (myMaxRank < opponentMaxRank)
+                    else if (myHighPairRankForThreeOfAKind < oppHighPairRankForThreeOfAKind)
                     {
                         res = Result.Loss;
                     }
@@ -328,13 +361,25 @@ namespace PokerHand
                     }
                     break;
                 case HandType.Four_Of_A_Kind:   // highest 4 of a kind wins
-                    myMaxRank = MyRanks.Where(x => x.Value == 4).Max(x => x.Key);
-                    opponentMaxRank = opponentHand.MyRanks.Where(x => x.Value == 4).Max(x => x.Key);
-                    if (myMaxRank > opponentMaxRank)
+                    int myHighPairRankForFourOfAKind = 0;
+                    for (int i = 0; i < MyRanks.Count; i++)
+                    {
+                        if (myRanksArray[i].Value == 4 && myRanksArray[i].Key > myHighPairRankForFourOfAKind)
+                            myHighPairRankForFourOfAKind = myRanksArray[i].Key;
+                    }
+                    int oppHighPairRankForFourOfAKind = 0;
+                    for (int i = 0; i < opponentHand.MyRanks.Count; i++)
+                    {
+                        if (oppRanksArray[i].Value == 4 && oppRanksArray[i].Key > oppHighPairRankForFourOfAKind)
+                            oppHighPairRankForFourOfAKind = oppRanksArray[i].Key;
+                    }
+                    myHighPairRank = MyRanks.Where(x => x.Value == 4).Max(x => x.Key);
+                    oppHighPairRank = opponentHand.MyRanks.Where(x => x.Value == 4).Max(x => x.Key);
+                    if (myHighPairRankForFourOfAKind > oppHighPairRankForFourOfAKind)
                     {
                         res = Result.Win;
                     }
-                    else if (myMaxRank < opponentMaxRank)
+                    else if (myHighPairRankForFourOfAKind < oppHighPairRankForFourOfAKind)
                     {
                         res = Result.Loss;
                     }
@@ -351,174 +396,183 @@ namespace PokerHand
         public HandType DetermineHandType()
         {
             HandType type = HandType.High_Card;
-            if (IsFlush())
+            bool isStraight = false;
+            if (MySuits.Count == 1)
             {
                 type = HandType.Flush;
-                if (IsStraightFlush())
+                if (MyRanks.Count == 5)
                 {
-                    if (IsRoyalFlush())
+                    var ranksArray = MyRanks.ToArray();
+                    int max = 0;
+                    int min = 15;
+                    for (int i = 0; i < MyRanks.Count; i++)
                     {
-                        type = HandType.Royal_Flush;
+                        if (ranksArray[i].Key > max)
+                            max = ranksArray[i].Key;
+                        if (ranksArray[i].Key < min)
+                            min = ranksArray[i].Key;
                     }
-                    else
+
+                    if (max - min == 4 || (max - min == 12 && MyRanks.ToList().OrderBy(x => x.Key).ToArray()[3].Key == 3))
                     {
-                        type = HandType.Straight_Flush;
+                        if (MyRanks.ContainsKey(8) && MyRanks.ContainsKey(12))
+                        {
+                            type = HandType.Royal_Flush;
+                        }
+                        else
+                        {
+                            type = HandType.Straight_Flush;
+                        }
                     }
                 }
+                return type;
             }
-            else if (IsStraight())
+            isStraight = false;
+            if (MyRanks.Count == 5)
             {
-                type = HandType.Straight;
-            }
-            else if (IsFourOfAKind())
-            {
-                type = HandType.Four_Of_A_Kind;
-            }
-            else if (IsFullHouse())
-            {
-                type = HandType.Full_House;
-            }
-            else if (IsThreeOfAKind())
-            {
-                type = HandType.Three_Of_A_Kind;
-            }
-            else if (IsTwoPair())
-            {
-                type = HandType.Two_Pair;
-            }
-            else if (IsAPair())
-            {
-                type = HandType.Pair;
-            }
-            return type;
-        }
-
-        private bool IsRoyalFlush()
-        {
-            return MyRanks.ContainsKey(8) && MyRanks.ContainsKey(12);
-        }
-
-        private bool IsAPair()
-        {
-            bool isAPair = false;
-            if (MyRanks.Count == 4)
-            {
-                if (MyRanks.ToList().Max(x => x.Value) == 2)
+                var ranksArray = MyRanks.ToArray();
+                int max = 0;
+                int min = 15;
+                for (int i = 0; i < MyRanks.Count; i++)
                 {
-                    isAPair = true;
+                    if (ranksArray[i].Key > max)
+                        max = ranksArray[i].Key;
+                    if (ranksArray[i].Key < min)
+                        min = ranksArray[i].Key;
+                }
+                if (max - min == 4 || (max - min == 12 && MyRanks.ToList().OrderBy(x => x.Key).ToArray()[3].Key == 3))
+                {
+                    return HandType.Straight;
                 }
             }
-            return isAPair;
-        }
-
-        private bool IsTwoPair()
-        {
-            bool isTwoPair = false;
-            if (MyRanks.Count == 3)
-            {
-                if (MyRanks.ToList().Max(x => x.Value) == 2)
-                {
-                    isTwoPair = true;
-                }
-            }
-            return isTwoPair;
-        }
-
-        private bool IsThreeOfAKind()
-        {
-            bool isThreeOfAKind = false;
-            if (MyRanks.Count == 3)
-            {
-                if (MyRanks.ToList().Max(x => x.Value) == 3)
-                {
-                    isThreeOfAKind = true;
-                }
-            }
-            return isThreeOfAKind;
-        }
-
-        private bool IsFullHouse()
-        {
-            bool isFullHouse = false;
-            if (MyRanks.Count == 2)
-            {
-                if (MyRanks.ToList().Max(x => x.Value) == 3)
-                {
-                    isFullHouse = true;
-                }
-            }
-            return isFullHouse;
-        }
-
-        private bool IsFourOfAKind()
-        {
             bool isFourOfAKind = false;
 
             if (MyRanks.Count == 2)
             {
-                if (MyRanks.ToList().Max(x => x.Value) == 4)
+                var ranksArray = MyRanks.ToArray();
+                int max = 0;
+                for (int i = 0; i < MyRanks.Count; i++)
                 {
-                    isFourOfAKind = true;
+                    if (ranksArray[i].Value > max)
+                        max = ranksArray[i].Value;
+                }
+                if (max == 4)
+                {
+                    return HandType.Four_Of_A_Kind;
                 }
             }
-
-            return isFourOfAKind;
-        }
-
-        private bool IsStraightFlush()
-        {
-            return IsStraight();
-        }
-
-        private bool IsStraight()
-        {
-            bool isStraight = false;
-            if (MyRanks.Count == 5)
+            bool isFullHouse = false;
+            if (MyRanks.Count == 2)
             {
-                int max = MyRanks.ToList().Max(x => x.Key);
-                int min = MyRanks.ToList().Min(x => x.Key);
-                if (max - min == 4 || (max - min == 12 && SecondHighestRank()==3))
+                var ranksArray = MyRanks.ToArray();
+                int max = 0;
+                for (int i = 0; i < MyRanks.Count; i++)
                 {
-                    isStraight = true;
+                    if (ranksArray[i].Value > max)
+                        max = ranksArray[i].Value;
+                }
+                if (max == 3)
+                {
+                    return HandType.Full_House;
                 }
             }
-
-            return isStraight;
+            bool isThreeOfAKind = false;
+            if (MyRanks.Count == 3)
+            {
+                var ranksArray = MyRanks.ToArray();
+                int max = 0;
+                for (int i = 0; i < MyRanks.Count; i++)
+                {
+                    if (ranksArray[i].Value > max)
+                        max = ranksArray[i].Value;
+                }
+                if (max == 3)
+                {
+                    return HandType.Three_Of_A_Kind;
+                }
+            }
+            bool isTwoPair = false;
+            if (MyRanks.Count == 3)
+            {
+                var ranksArray = MyRanks.ToArray();
+                int max = 0;
+                for (int i = 0; i < MyRanks.Count; i++)
+                {
+                    if (ranksArray[i].Value > max)
+                        max = ranksArray[i].Value;
+                }
+                if (max == 2)
+                {
+                    return HandType.Two_Pair;
+                }
+            }
+            bool isAPair = false;
+            if (MyRanks.Count == 4)
+            {
+                var ranksArray = MyRanks.ToArray();
+                int max = 0;
+                for (int i = 0; i < MyRanks.Count; i++)
+                {
+                    if (ranksArray[i].Value > max)
+                        max = ranksArray[i].Value;
+                }
+                if (max == 2)
+                {
+                    return HandType.Pair;
+                }
+            }
+            return type;
         }
 
-        private int SecondHighestRank()
+        public bool HandIsValid()
         {
-            // Used for tie breaker in a straight. Assumes 5 ranks
-            var sortedRanks = MyRanks.ToList().OrderBy(x => x.Key).ToArray();
-            return sortedRanks[3].Key;
-        }
-
-        private bool IsFlush()
-        {
-            return MySuits.Count == 1;
-        }
-
-        public bool IsHandValid(string[] hand)
-        {
-            if ((hand.Length != 5)
-                    || (!hand.ToList().TrueForAll(x => x.Length == 2))
-                    || (!hand.ToList().TrueForAll(x => SuitIsValid(x[1])))
-                    || (!hand.ToList().TrueForAll(x => RankIsValid(x[0])))
-                )
+            if (MyCards.Length != 5)
+            {
                 return false;
+            }
+            else
+            {
+                for (int i = 0; i < MyCards.Length; i++)
+                {
+                    if (MyCards[i].Length != 2)
+                    {
+                        return false;
+                    }
 
+                }
+                for (int i = 0; i < MyCards.Length; i++)
+                {
+                    bool suitIsValid = false;
+                    char c = MyCards[i][1];
+                    var toChar = c.ToString().ToUpper().ToCharArray()[0];
+                    for (var index = 0; index < Suits.Length; index++)
+                    {
+                        var suit = Suits[index];
+                        if (Equals(suit, toChar))
+                            suitIsValid = true;
+                    }
+
+                    if (!suitIsValid)
+                    {
+                        return false;
+                    }
+                }
+                for (int i = 0; i < MyCards.Length; i++)
+                {
+                    bool rankIsValid = false;
+                    char c = MyCards[i][0];
+                    var toChar = c.ToString().ToUpper().ToCharArray()[0];
+                    foreach (var rank in Ranks)
+                        if (Equals(rank, toChar))
+                            rankIsValid = true;
+
+                    if (!rankIsValid)
+                    {
+                        return false;
+                    }
+                }
+            }
             return true;
         }
-
-        private bool SuitIsValid(char c)
-        {
-            return Suits.Contains(c.ToString().ToUpper().ToCharArray()[0]);
-        }
-
-        private bool RankIsValid(char c)
-        {
-            return Ranks.Contains(c.ToString().ToUpper().ToCharArray()[0]);
-        }
-
     }
 }
