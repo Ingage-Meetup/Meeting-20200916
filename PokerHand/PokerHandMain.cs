@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -16,6 +17,85 @@ namespace PokerHand
         private static readonly string[] Cards = new string[52];
         private static Dictionary<HandType, int> aggregateHands = new Dictionary<HandType, int>();
         static void Main(string[] args)
+        {
+            DisplayMenu();
+
+        }
+
+        public static void DisplayMenu()
+        {
+            bool donePlaying = false;
+            while (!donePlaying)
+            {
+                int option = 0;
+                Console.WriteLine("Menu");
+                Console.WriteLine();
+                Console.WriteLine("1. Generate Lots Of Hands And Gather Stats");
+                Console.WriteLine("2. Play a game of poker with two players");
+                Console.WriteLine("3. Exit the app");
+                Console.Write("Enter 1, 2, or 3: ");
+                option = Convert.ToInt32(Console.ReadLine());
+                switch (option)
+                {
+                    case 1:
+                        GenerateLotsOfHandsAndGatherStats();
+                        break;
+                    case 2:
+                        TwoPlayerGame();
+                        break;
+                    case 3:
+                        donePlaying = true;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid option. Try again.");
+                        break;
+
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Thanks for playing!");
+            Console.WriteLine();
+        }
+
+        private static void TwoPlayerGame()
+        {
+            Console.Clear();
+            Console.WriteLine();
+            Console.Write("Enter Player 1's cards: ");
+            var player1Cards = Console.ReadLine();
+            var player1 = new PokerHand(player1Cards);
+
+            Console.WriteLine();
+            Console.Write("Enter Player 2's cards: ");
+            var player2Cards = Console.ReadLine();
+            var player2 = new PokerHand(player2Cards);
+
+            Result res = player1.CompareWith(player2);
+
+            Console.WriteLine();
+            if (res == Result.Win)
+            {
+                Console.Write("Player One is a winner! ");
+                Console.WriteLine($"A {player1.GetHandType()} beats a {player2.GetHandType()}");
+            }
+            else if (res == Result.Loss)
+            {
+                Console.Write("Player Two is a winner! ");
+                Console.WriteLine($"A {player2.GetHandType()} beats a {player1.GetHandType()}");
+            }
+            else
+            {
+                Console.Write("Player One and Player Two tie!");
+                Console.WriteLine($"A {player1.GetHandType()} equals {player2.GetHandType()}");
+            }
+
+            Console.WriteLine();
+        }
+
+
+
+        public static void GenerateLotsOfHandsAndGatherStats()
         {
             CreateDeck();
 
@@ -44,7 +124,7 @@ namespace PokerHand
             int numberOfRoyalFlushes = 0;
 
             //while (numberOfRoyalFlushes<10)
-            for (int i = 0; i < 2000000; i++)
+            for (int i = 0; i < 20000; i++)
             {
                 ShuffleCards();
                 var player1 = new PokerHand(DealHand(0));
@@ -69,7 +149,6 @@ namespace PokerHand
             }
 
             aggregateHands.ToList().ForEach(x => Console.WriteLine($"{x.Key.ToString().PadRight(20)}{x.Value,20}"));
-
         }
 
         static void LogHand(PokerHand hand)
@@ -335,7 +414,7 @@ namespace PokerHand
                     break;
                 case HandType.Three_Of_A_Kind:  // highest ranking 3 of a kind wins
                 case HandType.Full_House:       // Highest 3 cards wins
-                    int  myHighPairRankForThreeOfAKind = 0;
+                    int myHighPairRankForThreeOfAKind = 0;
                     for (int i = 0; i < MyRanks.Count; i++)
                     {
                         if (myRanksArray[i].Value == 3 && myRanksArray[i].Key > myHighPairRankForThreeOfAKind)
