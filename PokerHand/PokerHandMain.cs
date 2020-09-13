@@ -28,12 +28,15 @@ namespace PokerHand
             while (!donePlaying)
             {
                 int option = 0;
+                Console.WriteLine();
                 Console.WriteLine("Menu");
                 Console.WriteLine();
                 Console.WriteLine("1. Generate Lots Of Hands And Gather Stats");
-                Console.WriteLine("2. Play a game of poker with two players");
-                Console.WriteLine("3. Exit the app");
-                Console.Write("Enter 1, 2, or 3: ");
+                Console.WriteLine("2. Play a game of poker with two players - console input");
+                Console.WriteLine("3. Play a game of poker with two players - computer generated");
+                Console.WriteLine("4. Exit the app");
+                Console.WriteLine();
+                Console.Write("Enter 1, 2, 3, or 4: ");
                 option = Convert.ToInt32(Console.ReadLine());
                 switch (option)
                 {
@@ -41,9 +44,12 @@ namespace PokerHand
                         GenerateLotsOfHandsAndGatherStats();
                         break;
                     case 2:
-                        TwoPlayerGame();
+                        TwoPlayerGameConsoleInput();
                         break;
                     case 3:
+                        TwoPlayerGameGenerated();
+                        break;
+                    case 4:
                         donePlaying = true;
                         break;
                     default:
@@ -58,7 +64,17 @@ namespace PokerHand
             Console.WriteLine();
         }
 
-        private static void TwoPlayerGame()
+        private static void TwoPlayerGameGenerated()
+        {
+            CreateDeck();
+            ShuffleCards();
+            var player1 = new PokerHand(DealHand(0));
+            var player2 = new PokerHand(DealHand(5));
+
+            DetermineGameOutcome(player1, player2);
+        }
+
+        private static void TwoPlayerGameConsoleInput()
         {
             Console.Clear();
             Console.WriteLine();
@@ -71,9 +87,18 @@ namespace PokerHand
             var player2Cards = Console.ReadLine();
             var player2 = new PokerHand(player2Cards);
 
+            DetermineGameOutcome(player1, player2);
+        }
+
+        public static void DetermineGameOutcome(PokerHand player1, PokerHand player2)
+        {
             Result res = player1.CompareWith(player2);
 
             Console.WriteLine();
+            Console.WriteLine($"Player 1's hand: {player1.GetInputString()}");
+            Console.WriteLine($"Player 2's hand: {player2.GetInputString()}");
+            Console.WriteLine();
+
             if (res == Result.Win)
             {
                 Console.Write("Player One is a winner! ");
@@ -118,41 +143,64 @@ namespace PokerHand
                 Console.WriteLine($"{player5.GetInputString().ToString()}\t\t{player5.GetHandType()}");
             }
 
-            // Generate hands until 10 royal flushes are dealt
-            Console.WriteLine("Generate hands until 10 royal flushes are dealt");
             Console.WriteLine();
-            int numberOfRoyalFlushes = 0;
+            Console.WriteLine("Generate hands until a royal flush is dealt");
+            Console.WriteLine();
 
-            //while (numberOfRoyalFlushes<10)
-            for (int i = 0; i < 20000; i++)
+            int numberOfHands = 0;
+            aggregateHands.Clear();
+
+            while (true)
             {
                 ShuffleCards();
-                var player1 = new PokerHand(DealHand(0));
-                LogHand(player1);
-                var player2 = new PokerHand(DealHand(5));
-                LogHand(player2);
-                var player3 = new PokerHand(DealHand(10));
-                LogHand(player3);
-                var player4 = new PokerHand(DealHand(15));
-                LogHand(player4);
-                var player5 = new PokerHand(DealHand(20));
-                LogHand(player5);
-                if (player1.GetHandType() == HandType.Royal_Flush
-                    || player2.GetHandType() == HandType.Royal_Flush
-                    || player3.GetHandType() == HandType.Royal_Flush
-                    || player4.GetHandType() == HandType.Royal_Flush
-                    || player5.GetHandType() == HandType.Royal_Flush
-                    )
+                Random r = new Random();
+                int index = r.Next(0, 47);
+                var player = new PokerHand(DealHand(index));
+                numberOfHands++;
+                LogHand(player);
+                if (player.GetHandType() == HandType.Royal_Flush)
                 {
-                    numberOfRoyalFlushes++;
+                    break;
                 }
             }
 
+            // while (true)
+            // {
+            //     ShuffleCards();
+            //     var player1 = new PokerHand(DealHand(0));
+            //     LogHand(player1);
+            //     var player2 = new PokerHand(DealHand(5));
+            //     LogHand(player2);
+            //     var player3 = new PokerHand(DealHand(10));
+            //     LogHand(player3);
+            //     var player4 = new PokerHand(DealHand(15));
+            //     LogHand(player4);
+            //     var player5 = new PokerHand(DealHand(20));
+            //     LogHand(player5);
+            //     numberOfHands += 5;
+            //     if (player1.GetHandType() == HandType.Royal_Flush
+            //         || player2.GetHandType() == HandType.Royal_Flush
+            //         || player3.GetHandType() == HandType.Royal_Flush
+            //         || player4.GetHandType() == HandType.Royal_Flush
+            //         || player5.GetHandType() == HandType.Royal_Flush
+            //         )
+            //     {
+            //         break;
+            //     }
+            // }
+
+            Console.WriteLine();
+            Console.WriteLine($"{numberOfHands} hands were dealt.");
+            Console.WriteLine();
             aggregateHands.ToList().ForEach(x => Console.WriteLine($"{x.Key.ToString().PadRight(20)}{x.Value,20}"));
         }
 
         static void LogHand(PokerHand hand)
         {
+            if (hand.GetHandType() == HandType.Royal_Flush)
+            {
+                string s = "Stop the presses!";
+            }
             if (aggregateHands.ContainsKey(hand.GetHandType()))
             {
                 aggregateHands[hand.GetHandType()] += 1;
