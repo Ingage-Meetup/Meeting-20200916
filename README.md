@@ -10,21 +10,21 @@
  
      The defactored code is contained in a branch called kens-defactored-code.
  
- ### Clone the repo
+ ### 1. Clone the repo
   
       git clone https://github.com/Ingage-Meetup/Meeting-20200916.git
       
- ### Checkout kens-defactored-code
+ ### 2. Checkout kens-defactored-code
  
       git checkout kens-defactored-code
       
- ### Open the solution in Visual Studio and compile it
+ ### 3. Open the solution in Visual Studio and compile it
  
       NOTE: You will need .Net core version 3.x to run the solution.
       
- ### Run the tests
+ ### 4. Run the tests
  
- ### Run the console app
+ ### 5. Run the console app
  
      The console app presents a menu where you can run the following items:
      
@@ -35,6 +35,6 @@
      
      I recommend you try options 1 and 3 prior to refactoring the app.
      
- ### Refactor the PokerHand class
+ ### 6. Refactor the PokerHand class
  
      
