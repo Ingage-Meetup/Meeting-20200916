@@ -164,31 +164,6 @@ namespace PokerHand
                 }
             }
 
-            // while (true)
-            // {
-            //     ShuffleCards();
-            //     var player1 = new PokerHand(DealHand(0));
-            //     LogHand(player1);
-            //     var player2 = new PokerHand(DealHand(5));
-            //     LogHand(player2);
-            //     var player3 = new PokerHand(DealHand(10));
-            //     LogHand(player3);
-            //     var player4 = new PokerHand(DealHand(15));
-            //     LogHand(player4);
-            //     var player5 = new PokerHand(DealHand(20));
-            //     LogHand(player5);
-            //     numberOfHands += 5;
-            //     if (player1.GetHandType() == HandType.Royal_Flush
-            //         || player2.GetHandType() == HandType.Royal_Flush
-            //         || player3.GetHandType() == HandType.Royal_Flush
-            //         || player4.GetHandType() == HandType.Royal_Flush
-            //         || player5.GetHandType() == HandType.Royal_Flush
-            //         )
-            //     {
-            //         break;
-            //     }
-            // }
-
             Console.WriteLine();
             Console.WriteLine($"{numberOfHands} hands were dealt.");
             Console.WriteLine();
@@ -289,10 +264,11 @@ namespace PokerHand
         {
             InputString = cards;
             MyCards = cards.Split(' ');
-            InitMySuits();
-            InitMyRanks();
+
             if (HandIsValid())
             {
+                InitMySuits();
+                InitMyRanks();
                 MyHandType = DetermineHandType();
             }
             else
